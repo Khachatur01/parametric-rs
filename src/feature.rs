@@ -1,15 +1,5 @@
-use crate::entity::EntityId;
-use crate::param::ParamId;
-use crate::sketch::SketchId;
+use crate::sketch::Sketch;
 
-pub enum Feature {
-    Extrude {
-        sketch: SketchId,
-        height: ParamId,
-    },
-    Revolve {
-        sketch: SketchId,
-        axis: (EntityId, EntityId),
-        angle: ParamId,
-    },
+pub trait Feature {
+    fn apply(&self, sketch: &mut Sketch);
 }

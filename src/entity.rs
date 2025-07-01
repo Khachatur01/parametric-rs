@@ -1,4 +1,5 @@
 use crate::sketch::Sketch;
+use dyn_clone::DynClone;
 use std::any::Any;
 use std::sync::atomic::AtomicUsize;
 
@@ -14,8 +15,13 @@ impl EntityId {
 }
 
 
-pub trait Entity: Any {
+pub trait Entity: Any + DynClone {
     fn as_any(&self) -> &dyn Any;
+}
+impl Clone for Box<dyn Entity> {
+    fn clone(&self) -> Self {
+        dyn_clone::clone_box(self.as_ref())
+    }
 }
 
 #[derive(Debug)]

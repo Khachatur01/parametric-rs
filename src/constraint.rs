@@ -1,8 +1,16 @@
 use crate::param::{Param, ParamId};
+use dyn_clone::DynClone;
 use std::collections::HashMap;
+use std::fmt::Debug;
 
-pub trait Constraint {}
+pub trait Constraint: DynClone {}
+impl Clone for Box<dyn Constraint> {
+    fn clone(&self) -> Self {
+        dyn_clone::clone_box(self.as_ref())
+    }
+}
 
+#[derive(Clone)]
 pub struct Constraints {
     constraints: Vec<Box<dyn Constraint>>,
 }

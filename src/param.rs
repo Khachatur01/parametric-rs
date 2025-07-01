@@ -1,4 +1,6 @@
+use dyn_clone::DynClone;
 use std::any::Any;
+use std::fmt::Debug;
 use std::sync::atomic::AtomicUsize;
 
 static PARAM_ID: AtomicUsize = AtomicUsize::new(0);
@@ -13,7 +15,12 @@ impl ParamId {
 }
 
 
-pub trait Param {
+pub trait Param: DynClone {
     fn label(&self) -> Option<String>;
     fn value(&self) -> &dyn Any;
+}
+impl Clone for Box<dyn Param> {
+    fn clone(&self) -> Self {
+        dyn_clone::clone_box(self.as_ref())
+    }
 }

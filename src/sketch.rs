@@ -15,6 +15,7 @@ impl SketchId {
 }
 
 
+#[derive(Clone)]
 pub struct Sketch {
     params: HashMap<ParamId, Box<dyn Param>>,
     entities: HashMap<EntityId, Box<dyn Entity>>,
