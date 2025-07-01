@@ -1,14 +1,24 @@
 use std::collections::HashMap;
 use crate::param::{Param, ParamId};
 
-pub enum Constraint {}
+pub trait Constraint {}
 
 pub struct Constraints {
-    pub constraints: Vec<Constraint>,
+    constraints: Vec<Box<dyn Constraint>>,
 }
 
 impl Constraints {
+    pub fn empty() -> Self {
+        Self {
+            constraints: Vec::new(),
+        }
+    }
+
+    pub fn add_constraint(&mut self, constraint: impl Constraint + 'static) {
+        self.constraints.push(Box::new(constraint));
+    }
+
     pub fn solve(&self, params: HashMap<ParamId, Box<dyn Param>>) {
-        
+
     }
 }

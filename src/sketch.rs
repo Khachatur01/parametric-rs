@@ -1,64 +1,75 @@
+use crate::constraint::{Constraint, Constraints};
+use crate::entity::{Entity, EntityConversionError, EntityId};
+use crate::param::{Param, ParamId};
 use std::collections::HashMap;
-use geometry::figure::circle::Circle;
-use geometry::figure::mesh::Mesh;
-use geometry::figure::segment::Segment;
-use geometry::point::point_2d::Point2D;
-use crate::constraint::Constraints;
-use crate::entity::{Entity, EntityId};
-use crate::param::{F64Param, Param, ParamId};
+use std::sync::atomic::AtomicUsize;
 
-pub struct SketchId(u64);
-pub struct Sketch {
-    pub params: HashMap<ParamId, Box<dyn Param>>,
-    pub entities: HashMap<EntityId, Entity>,
-    pub constraints: Constraints,
-}
+static SKETCH_ID: AtomicUsize = AtomicUsize::new(0);
 
-pub trait SketchConverter {
-    type Result;
-    fn convert(sketch: &Sketch) -> Self::Result;
-}
-
-pub enum Shape {
-    Point2D(Point2D),
-    Segment2D(Segment<Point2D>),
-    Circle(Circle),
-    Mesh2D(Mesh<Point2D>)
-}
-
-pub struct SketchToShapeConverter;
-impl SketchConverter for SketchToShapeConverter {
-    type Result = Vec<Shape>;
-
-    fn convert(sketch: &Sketch) -> Self::Result {
-        sketch.entities
-            .values()
-            .map(|entity| match entity {
-                Entity::Point { x, y } => {
-                    let x = **sketch.params.get(x).unwrap().value().downcast_ref::<F64Param>().unwrap();
-                    let y = **sketch.params.get(y).unwrap().value().downcast_ref::<F64Param>().unwrap();
-
-                    Shape::Point2D(Point2D { x, y })
-                }
-                Entity::Line { start, end } => {
-                    let start = sketch.entities.get(start).unwrap();
-                    let end = sketch.entities.get(end).unwrap();
-                    let (Entity::Point { x: start_x, y: start_y }, Entity::Point { x: end_x, y: end_y }) = (start, end) else {
-                        panic!()
-                    };
-
-                    let start_x = **sketch.params.get(start_x).unwrap().value().downcast_ref::<F64Param>().unwrap();
-                    let start_y = **sketch.params.get(start_y).unwrap().value().downcast_ref::<F64Param>().unwrap();
-
-                    let end_x = **sketch.params.get(end_x).unwrap().value().downcast_ref::<F64Param>().unwrap();
-                    let end_y = **sketch.params.get(end_y).unwrap().value().downcast_ref::<F64Param>().unwrap();
-
-                    Shape::Segment2D(Segment::new(Point2D { x: start_x, y: start_y }, Point2D { x: end_x, y: end_y }))
-                }
-                Entity::Circle { center, radius } => {
-                    Shape::Circle(Circle::new(Point2D { x: 0.0, y: 0.0 }, 0.0))
-                }
-            })
-            .collect()
+pub struct SketchId(usize);
+impl SketchId {
+    pub fn generate() -> Self {
+        let id: usize = SKETCH_ID.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+        SketchId(id)
     }
+}
+
+
+pub struct Sketch {
+    params: HashMap<ParamId, Box<dyn Param>>,
+    entities: HashMap<EntityId, Box<dyn Entity>>,
+    constraints: Constraints,
+}
+impl Sketch {
+    pub fn empty() -> Self {
+        Self {
+            params: HashMap::new(),
+            entities: HashMap::new(),
+            constraints: Constraints::empty()
+        }
+    }
+
+    pub fn params(&self) -> &HashMap<ParamId, Box<dyn Param>> {
+        &self.params
+    }
+    pub fn entities(&self) -> &HashMap<EntityId, Box<dyn Entity>> {
+        &self.entities
+    }
+    pub fn constraints(&self) -> &Constraints {
+        &self.constraints
+    }
+
+    pub fn add_param(&mut self, param: impl Param + 'static) -> ParamId {
+        let param_id = ParamId::generate();
+
+        self.params.insert(param_id, Box::new(param));
+
+        param_id
+    }
+
+    pub fn add_entity(&mut self, entity: impl Entity + 'static) -> EntityId {
+        let entity_id = EntityId::generate();
+
+        self.entities.insert(entity_id, Box::new(entity));
+
+        entity_id
+    }
+
+    pub fn add_constraint(&mut self, constraint: impl Constraint + 'static) {
+        self.constraints.add_constraint(constraint)
+    }
+}
+
+
+#[derive(Debug)]
+pub enum SketchConversionError {
+    EntityDoesNotFound(EntityId),
+    EntityConversionError(EntityConversionError),
+}
+
+pub trait SketchConverter<T> {
+    fn try_into(&self, sketch: &Sketch) -> Result<Vec<T>, SketchConversionError>;
+    fn into(&self, sketch: &Sketch) -> Vec<T>;
+
+    fn from(&self, inputs: &[T]) -> Sketch;
 }

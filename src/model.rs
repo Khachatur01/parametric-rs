@@ -1,6 +1,6 @@
-use std::collections::HashMap;
 use crate::feature::Feature;
-use crate::sketch::{Shape, Sketch, SketchConverter, SketchId, SketchToShapeConverter};
+use crate::sketch::{Sketch, SketchConverter, SketchId};
+use std::collections::HashMap;
 
 pub struct Model {
     pub sketches: HashMap<SketchId, Sketch>,
@@ -8,10 +8,10 @@ pub struct Model {
 }
 
 impl Model {
-    pub fn convert(&self) -> Vec<Shape> {
+    pub fn convert<Result>(&self, sketch_to_shape_converter: &dyn SketchConverter<Result>) -> Vec<Result> {
         self.sketches
             .values()
-            .map(SketchToShapeConverter::convert)
+            .map(|sketch| sketch_to_shape_converter.into(sketch))
             .flatten()
             .collect()
     }
