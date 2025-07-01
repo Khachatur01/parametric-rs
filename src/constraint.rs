@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use crate::param::{Param, ParamId};
+use std::collections::HashMap;
 
 pub trait Constraint {}
 
