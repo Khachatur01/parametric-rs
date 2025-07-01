@@ -4,6 +4,4 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-geometry = { version = "0.1.0", path = "../geometry" }
-
 dyn-clone = "1.0.19"
