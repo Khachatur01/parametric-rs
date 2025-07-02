@@ -12,26 +12,27 @@ impl ParamId {
     }
 }
 
-#[derive(PartialEq, Copy, Clone, Debug)]
+#[derive(PartialEq, Clone, Debug)]
 pub enum ParamValue {
-    F64(f64),
+    F64(f64)
 }
+
 #[derive(PartialEq, Clone, Debug)]
 pub struct Param {
-    pub label: Option<String>,
+    pub name: Option<String>,
     pub value: ParamValue,
 }
 
 impl Param {
     pub fn f64(value: f64) -> Self {
         Self {
-            label: None,
+            name: None,
             value: ParamValue::F64(value),
         }
     }
-    pub fn f64_labeled(value: f64, label: String) -> Self {
+    pub fn f64_named(value: f64, label: String) -> Self {
         Self {
-            label: Some(label),
+            name: Some(label),
             value: ParamValue::F64(value),
         }
     }

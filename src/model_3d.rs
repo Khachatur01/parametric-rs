@@ -3,13 +3,13 @@ use crate::param::{Param, ParamId};
 use crate::sketch::{Sketch, SketchId};
 use std::collections::HashMap;
 
-pub struct Model {
+pub struct Model3D {
     pub params: HashMap<ParamId, Param>,
     pub sketches: HashMap<SketchId, Sketch>,
     pub features: Vec<Feature>,
 }
 
-impl Model {
+impl Model3D {
     pub fn insert_param(&mut self, param: Param) -> ParamId {
         let param_id: ParamId = ParamId::generate();
 
@@ -41,5 +41,5 @@ pub trait ModelInto<T> {
 }
 
 pub trait ModelFrom<T> {
-    fn try_from(inputs: &[T]) -> Result<Model, ModelConversionError>;
+    fn try_from(inputs: &[T]) -> Result<Model3D, ModelConversionError>;
 }
