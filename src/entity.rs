@@ -1,6 +1,4 @@
-use crate::sketch::Sketch;
-use dyn_clone::DynClone;
-use std::any::Any;
+use crate::param::ParamId;
 use std::sync::atomic::AtomicUsize;
 
 static ENTITY_ID: AtomicUsize = AtomicUsize::new(0);
@@ -14,21 +12,33 @@ impl EntityId {
     }
 }
 
-
-pub trait Entity: Any + DynClone {
-    fn as_any(&self) -> &dyn Any;
-}
-impl Clone for Box<dyn Entity> {
-    fn clone(&self) -> Self {
-        dyn_clone::clone_box(self.as_ref())
-    }
+#[derive(PartialEq, Clone, Debug)]
+pub enum Entity {
+    Point(PointEntity),
+    Segment(SegmentEntity),
+    Circle(CircleEntity),
+    Mesh(MeshEntity),
 }
 
-#[derive(Debug)]
-pub enum EntityConversionError {
-    InvalidEntity,
+#[derive(PartialEq, Clone, Debug)]
+pub struct PointEntity {
+    pub x: ParamId,
+    pub y: ParamId,
 }
 
-pub trait EntityConverter<R> {
-    fn try_convert(&self, sketch: &Sketch, entity: &dyn Entity) -> Result<R, EntityConversionError>;
+#[derive(PartialEq, Clone, Debug)]
+pub struct SegmentEntity {
+    pub start: PointEntity,
+    pub end: PointEntity,
+}
+
+#[derive(PartialEq, Clone, Debug)]
+pub struct CircleEntity {
+    pub center: PointEntity,
+    pub radius: ParamId,
+}
+
+#[derive(PartialEq, Clone, Debug)]
+pub struct MeshEntity {
+    pub edges: Vec<SegmentEntity>,
 }

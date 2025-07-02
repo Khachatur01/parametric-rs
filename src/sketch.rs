@@ -1,5 +1,5 @@
 use crate::constraint::{Constraint, Constraints};
-use crate::entity::{Entity, EntityConversionError, EntityId};
+use crate::entity::{Entity, EntityId};
 use crate::param::{Param, ParamId};
 use std::collections::HashMap;
 use std::sync::atomic::AtomicUsize;
@@ -17,10 +17,11 @@ impl SketchId {
 
 #[derive(Clone)]
 pub struct Sketch {
-    params: HashMap<ParamId, Box<dyn Param>>,
-    entities: HashMap<EntityId, Box<dyn Entity>>,
+    params: HashMap<ParamId, Param>,
+    entities: HashMap<EntityId, Entity>,
     constraints: Constraints,
 }
+
 impl Sketch {
     pub fn empty() -> Self {
         Self {
@@ -30,28 +31,28 @@ impl Sketch {
         }
     }
 
-    pub fn params(&self) -> &HashMap<ParamId, Box<dyn Param>> {
+    pub fn params(&self) -> &HashMap<ParamId, Param> {
         &self.params
     }
-    pub fn entities(&self) -> &HashMap<EntityId, Box<dyn Entity>> {
+    pub fn entities(&self) -> &HashMap<EntityId, Entity> {
         &self.entities
     }
     pub fn constraints(&self) -> &Constraints {
         &self.constraints
     }
 
-    pub fn add_param(&mut self, param: impl Param + 'static) -> ParamId {
+    pub fn add_param(&mut self, param: Param) -> ParamId {
         let param_id = ParamId::generate();
 
-        self.params.insert(param_id, Box::new(param));
+        self.params.insert(param_id, param);
 
         param_id
     }
 
-    pub fn add_entity(&mut self, entity: impl Entity + 'static) -> EntityId {
+    pub fn add_entity(&mut self, entity: Entity) -> EntityId {
         let entity_id = EntityId::generate();
 
-        self.entities.insert(entity_id, Box::new(entity));
+        self.entities.insert(entity_id, entity);
 
         entity_id
     }
@@ -59,18 +60,4 @@ impl Sketch {
     pub fn add_constraint(&mut self, constraint: impl Constraint + 'static) {
         self.constraints.add_constraint(constraint)
     }
-}
-
-
-#[derive(Debug)]
-pub enum SketchConversionError {
-    EntityDoesNotFound(EntityId),
-    EntityConversionError(EntityConversionError),
-}
-
-pub trait SketchConverter<T> {
-    fn try_into(&self, sketch: &Sketch) -> Result<Vec<T>, SketchConversionError>;
-    fn into(&self, sketch: &Sketch) -> Vec<T>;
-
-    fn from(&self, inputs: &[T]) -> Sketch;
 }

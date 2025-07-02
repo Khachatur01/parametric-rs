@@ -1,30 +1,43 @@
 use crate::feature::Feature;
-use crate::sketch::{Sketch, SketchConverter, SketchId};
+use crate::sketch::{Sketch, SketchId};
 use std::collections::HashMap;
 
 pub struct Model {
     pub sketches: HashMap<SketchId, Sketch>,
-    pub features: Vec<Box<dyn Feature>>,
+    pub features: Vec<Feature>,
 }
 
 impl Model {
-    pub fn add_feature(&mut self, feature: impl Feature + 'static) {
-        self.features.push(Box::new(feature));
+    pub fn add_feature(&mut self, feature: Feature) {
+        self.features.push(feature);
     }
 
-    pub fn convert<Result>(&self, sketch_to_shape_converter: &dyn SketchConverter<Result>) -> Vec<Result> {
-        let mut sketches = self.sketches.values().cloned().collect::<Vec<_>>();
+    // pub fn into<Result, C: SketchInto<Result>>(&self) -> Vec<Result> {
+    //     let mut sketches = self.sketches.values().cloned().collect::<Vec<_>>();
+    // 
+    //     for feature in &self.features {
+    //         for sketch in &mut sketches {
+    //             feature.apply(sketch);
+    //         }
+    //     }
+    // 
+    //     sketches
+    //         .iter()
+    //         .map(C::into)
+    //         .flatten()
+    //         .collect()
+    // }
+}
 
-        for feature in &self.features {
-            for sketch in &mut sketches {
-                feature.apply(sketch);
-            }
-        }
 
-        sketches
-            .iter()
-            .map(|sketch| sketch_to_shape_converter.into(sketch))
-            .flatten()
-            .collect()
-    }
+
+#[derive(Debug)]
+pub enum ModelConversionError {}
+
+pub trait ModelInto<T> {
+    fn try_into(&self) -> Result<Vec<T>, ModelConversionError>;
+}
+
+pub trait ModelFrom<T> {
+    fn try_from(inputs: &[T]) -> Result<Model, ModelConversionError>;
 }

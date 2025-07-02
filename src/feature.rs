@@ -1,5 +1,11 @@
 use crate::sketch::Sketch;
 
-pub trait Feature {
-    fn apply(&self, sketch: &mut Sketch);
+pub enum Feature {
+    
+}
+
+impl Feature {
+    pub fn apply(&self, sketch: &mut Sketch) {
+        todo!()
+    }
 }

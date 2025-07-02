@@ -1,5 +1,3 @@
-use dyn_clone::DynClone;
-use std::any::Any;
 use std::fmt::Debug;
 use std::sync::atomic::AtomicUsize;
 
@@ -14,13 +12,27 @@ impl ParamId {
     }
 }
 
-
-pub trait Param: DynClone {
-    fn label(&self) -> Option<String>;
-    fn value(&self) -> &dyn Any;
+#[derive(PartialEq, Copy, Clone, Debug)]
+pub enum ParamValue {
+    F64(f64),
 }
-impl Clone for Box<dyn Param> {
-    fn clone(&self) -> Self {
-        dyn_clone::clone_box(self.as_ref())
+#[derive(PartialEq, Clone, Debug)]
+pub struct Param {
+    pub label: Option<String>,
+    pub value: ParamValue,
+}
+
+impl Param {
+    pub fn f64(value: f64) -> Self {
+        Self {
+            label: None,
+            value: ParamValue::F64(value),
+        }
+    }
+    pub fn f64_labeled(value: f64, label: String) -> Self {
+        Self {
+            label: Some(label),
+            value: ParamValue::F64(value),
+        }
     }
 }
