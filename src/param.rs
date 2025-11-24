@@ -1,11 +1,14 @@
+use std::collections::HashMap;
 use std::fmt::Debug;
 
 #[derive(PartialEq, Clone, Debug)]
-pub struct Ref(String);
+pub enum Expression {
+    Value(ValueExpression),
+    Name(String),
+}
 
 #[derive(PartialEq, Clone, Debug)]
-pub enum Expression {
-    Reference(Ref),
+pub enum ValueExpression {
     RealNumber(f64),
     IntegerNumber(i64),
     NaturalNumber(u64),
@@ -22,13 +25,13 @@ pub enum Expression {
     Arctan(Box<Expression>)
 }
 
-#[derive(PartialEq, Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct ParamSet {
-    pub parameters: Vec<Expression>,
+    pub parameters: HashMap<String, ValueExpression>,
 }
 
 impl ParamSet {
-    pub fn add_parameter(&mut self, parameter: Expression) {
-        self.parameters.push(parameter)
+    pub fn add_parameter(&mut self, name: String, parameter: ValueExpression) {
+        self.parameters.insert(name, parameter);
     }
 }
