@@ -1,22 +1,22 @@
 use crate::feature::Feature;
-use crate::param::{Param, ParamId};
+use crate::param::ParamSet;
 use crate::sketch::{Sketch, SketchId};
 use std::collections::HashMap;
 
 pub struct Model3D {
-    pub params: HashMap<ParamId, Param>,
+    pub param_set: ParamSet,
     pub sketches: HashMap<SketchId, Sketch>,
     pub features: Vec<Feature>,
 }
 
 impl Model3D {
-    pub fn insert_param(&mut self, param: Param) -> ParamId {
-        let param_id: ParamId = ParamId::generate();
-
-        self.params.insert(param_id, param);
-
-        param_id
-    }
+    // pub fn insert_param(&mut self, param: Param) -> ParamId {
+    //     let param_id: ParamId = ParamId::generate();
+    //
+    //     self.params.insert(param_id, param);
+    //
+    //     param_id
+    // }
 
     pub fn insert_sketch(&mut self, sketch: Sketch) -> SketchId {
         let sketch_id: SketchId = SketchId::generate();

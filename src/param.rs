@@ -1,39 +1,34 @@
 use std::fmt::Debug;
-use std::sync::atomic::AtomicUsize;
 
-static PARAM_ID: AtomicUsize = AtomicUsize::new(0);
+#[derive(PartialEq, Clone, Debug)]
+pub struct Ref(String);
 
-#[derive(Eq, PartialEq, Hash, Clone, Copy, Debug)]
-pub struct ParamId(usize);
-impl ParamId {
-    pub fn generate() -> Self {
-        let id: usize = PARAM_ID.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-        ParamId(id)
-    }
+#[derive(PartialEq, Clone, Debug)]
+pub enum Expression {
+    Reference(Ref),
+    RealNumber(f64),
+    IntegerNumber(i64),
+    NaturalNumber(u64),
+    PlusOperator(Box<Expression>, Box<Expression>),
+    MinusOperator(Box<Expression>, Box<Expression>),
+    DivideOperator(Box<Expression>, Box<Expression>),
+    MultiplyOperator(Box<Expression>, Box<Expression>),
+    Sin(Box<Expression>),
+    Cos(Box<Expression>),
+    Tan(Box<Expression>),
+    CoTan(Box<Expression>),
+    Arcsin(Box<Expression>),
+    Arccos(Box<Expression>),
+    Arctan(Box<Expression>)
 }
 
 #[derive(PartialEq, Clone, Debug)]
-pub enum ParamValue {
-    F64(f64)
+pub struct ParamSet {
+    pub parameters: Vec<Expression>,
 }
 
-#[derive(PartialEq, Clone, Debug)]
-pub struct Param {
-    pub name: Option<String>,
-    pub value: ParamValue,
-}
-
-impl Param {
-    pub fn f64(value: f64) -> Self {
-        Self {
-            name: None,
-            value: ParamValue::F64(value),
-        }
-    }
-    pub fn f64_named(value: f64, label: String) -> Self {
-        Self {
-            name: Some(label),
-            value: ParamValue::F64(value),
-        }
+impl ParamSet {
+    pub fn add_parameter(&mut self, parameter: Expression) {
+        self.parameters.push(parameter)
     }
 }

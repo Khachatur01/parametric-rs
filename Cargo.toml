@@ -3,5 +3,10 @@ name = "parametric-rs"
 version = "0.1.0"
 edition = "2024"
 
+[workspace]
+members = [
+    "id_derive"
+]
+
 [dependencies]
-dyn-clone = "1.0.19"
+id_derive = { path = "id_derive" }
